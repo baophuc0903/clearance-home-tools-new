@@ -10,3 +10,19 @@ $('login').onsubmit=async e=>{e.preventDefault();$('error').textContent='';let r
 async function uploadPhoto(){const file=$('photo').files[0];if(!file)return null;const path=crypto.randomUUID()+'-'+file.name;const r=await db.storage.from('product_images').upload(path,file,{upsert:false});if(r.error){alert(r.error.message);return false}return db.storage.from('product_images').getPublicUrl(path).data.publicUrl}
 $('listingForm').onsubmit=async e=>{e.preventDefault();const image_url=await uploadPhoto();if(image_url===false)return;let row={name:$('name').value,price:Number($('price').value),category:$('formCategory').value,condition:$('condition').value,description:$('description').value,image_url:image_url||undefined},r=editing?await db.from('products').update(row).eq('id',editing):await db.from('products').insert(row);if(r.error){alert(r.error.message);return}e.target.reset();editing=null;$('cancel').style.display='none';$('formTitle').textContent='Add a listing';load()};$('cancel').onclick=()=>{editing=null;$('listingForm').reset();$('cancel').style.display='none';$('formTitle').textContent='Add a listing'};window.editItem=id=>{let x=items.find(a=>a.id===id);editing=id;$('name').value=x.name;$('price').value=x.price;$('formCategory').value=x.category;$('condition').value=x.condition;$('description').value=x.description||'';$('formTitle').textContent='Edit listing';$('cancel').style.display='inline-block';window.scrollTo(0,document.body.scrollHeight)};window.deleteItem=async id=>{if(confirm('Remove this listing?')){await db.from('products').delete().eq('id',id);load()}};db.auth.getSession().then(r=>{if(r.data.session){signed=true;$('logout').style.display='inline-block';$('status').textContent='Signed in as owner. Only your account can manage products.'}});load();
 </script></body></html>
+</style><style>
+.photo{height:220px!important;overflow:hidden!important;display:grid;place-items:center}
+.photo img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}
+</style><style>
+.grid{grid-template-columns:1fr}
+.card{display:grid;grid-template-columns:minmax(250px,35%) 1fr}
+.card .photo{height:100%;min-height:280px}
+@media(max-width:720px){.card{display:block}.card .photo{height:220px;min-height:0}}
+</style>
+<style>
+.grid{grid-template-columns:1fr!important}
+.card{display:grid!important;grid-template-columns:300px 1fr!important}
+.card .photo{height:100%!important;min-height:280px!important;overflow:hidden!important}
+.card .photo img{width:100%!important;height:100%!important;object-fit:contain!important}
+@media(max-width:720px){.card{display:block!important}.card .photo{height:220px!important;min-height:220px!important}}
+</style>
